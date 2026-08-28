@@ -3,165 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garage Domotica</title>
+    <title>Garage Security 🛡️</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            background-color: #0f172a;
+            color: #f8fafc;
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        h1 { margin-bottom: 20px; }
+        h1 { margin-bottom: 5px; font-size: 24px; text-align: center; }
+        p.subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 20px; text-align: center; }
         .card {
-            background-color: #1e1e1e;
-            border-radius: 12px;
+            background-color: #1e293b;
+            border-radius: 16px;
             padding: 20px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             margin-bottom: 20px;
             box-sizing: border-box;
+            border: 1px solid #334155;
         }
-        .btn {
-            background-color: #2563eb;
+        .btn-refresh {
+            background-color: #3b82f6;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 12px;
             width: 100%;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        .btn:active { background-color: #1d4ed8; }
-        .btn-danger { background-color: #dc2626; }
-        .btn-danger:active { background-color: #b91c1c; }
-        .input-group {
             margin-bottom: 15px;
         }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
-        input {
+        .btn-refresh:active { background-color: #2563eb; }
+        .photo-box {
             width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            background: #2a2a2a;
-            color: #fff;
-            box-sizing: border-box;
+            height: 240px;
+            background-color: #0f172a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px dashed #475569;
+        }
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         #log-container {
             font-family: monospace;
-            background: #000;
-            padding: 10px;
-            border-radius: 6px;
-            max-height: 200px;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 10px;
+            max-height: 180px;
             overflow-y: auto;
             white-space: pre-wrap;
             font-size: 13px;
-            color: #34d399;
+            color: #38bdf8;
+            border: 1px solid #334155;
         }
     </style>
 </head>
 <body>
 
-    <h1>Garage Domotica 🚗</h1>
+    <h1>Garage Security 🛡️</h1>
+    <p class="subtitle">Monitoraggio Passaggi & Rilevamento Presenze</p>
 
-    <!-- Configurazione Chiave Token -->
+    <button class="btn-refresh" onclick="caricaDati()">🔄 Aggiorna Ora</button>
+
+    <!-- Ultima Foto Scattata -->
     <div class="card">
-        <h3>Impostazioni Accesso</h3>
-        <div class="input-group">
-            <label for="token">Inserisci il Token (PAT):</label>
-            <input type="password" id="token" placeholder="ghp_...">
+        <h3>📷 Ultimo Scatto</h3>
+        <div class="photo-box" id="photo-box">
+            <span style="color: #64748b;">Nessuna foto ancora scattata</span>
         </div>
-        <button class="btn" onclick="salvaToken()">Salva Chiave</button>
     </div>
 
-    <!-- Comandi del Garage -->
+    <!-- Registro Passaggi -->
     <div class="card">
-        <h3>Controlli Remoti</h3>
-        <button class="btn" onclick="inviaComando('comando_luce', 'accendi')">💡 Accendi / Spegni Luce</button>
-        <button class="btn btn-danger" onclick="inviaComando('comando_relé', 'apri_portone')">🔓 Apri Portone Garage</button>
-    </div>
-
-    <!-- Registro Eventi e Ingressi -->
-    <div class="card">
-        <h3>Registro Ingressi</h3>
-        <button class="btn" style="background-color: #374151;" onclick="caricaLog()">🔄 Aggiorna Registro</button>
-        <br><br>
-        <div id="log-container">Caricamento log...</div>
+        <h3>📋 Registro Passaggi</h3>
+        <div id="log-container">Caricamento registro...</div>
     </div>
 
     <script>
         const REPO_OWNER = "webstudioagency0";
         const REPO_NAME = "garage-domotica-app";
 
-        // Carica token salvato nel browser
         window.onload = function() {
-            const savedToken = localStorage.getItem("github_pat");
-            if (savedToken) {
-                document.getElementById("token").value = savedToken;
-            }
-            caricaLog();
+            caricaDati();
         };
 
-        function salvaToken() {
-            const t = document.getElementById("token").value;
-            localStorage.setItem("github_pat", t);
-            alert("Token salvato con successo sul tuo dispositivo!");
-        }
-
-        async function inviaComando(tipoEvento, azione) {
-            const token = localStorage.getItem("github_pat");
-            if (!token) {
-                alert("Inserisci e salva prima il tuo Token PAT!");
-                return;
-            }
-
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/dispatches`;
+        function caricaDati() {
+            const timestamp = new Date().getTime();
             
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        event_type: tipoEvento,
-                        client_payload: { azione: azione, ora: new Date().toLocaleTimeString() }
-                    })
+            // 1. Carica Registro Testo
+            fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/log_ingressi.txt?t=${timestamp}`)
+                .then(res => res.text())
+                .then(text => {
+                    document.getElementById("log-container").innerText = text;
+                })
+                .catch(() => {
+                    document.getElementById("log-container").innerText = "Nessun passaggio registrato.";
                 });
 
-                if (response.ok) {
-                    alert("Comando inviato con successo!");
-                } else {
-                    alert("Errore nell'invio del comando. Verifica il Token.");
-                }
-            } catch (err) {
-                alert("Errore di connessione: " + err);
-            }
-        }
-
-        async function caricaLog() {
-            const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/log_ingressi.txt`;
-            try {
-                const response = await fetch(url + '?t=' + new Date().getTime());
-                if (response.ok) {
-                    const testo = await response.text();
-                    document.getElementById("log-container").innerText = testo;
-                } else {
-                    document.getElementById("log-container").innerText = "Nessun registro trovato o file non ancora creato.";
-                }
-            } catch (err) {
-                document.getElementById("log-container").innerText = "Impossibile caricare il log.";
-            }
+            // 2. Carica Ultima Foto Scattata
+            const imgUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/ultima_foto.jpg?t=${timestamp}`;
+            const img = new Image();
+            img.src = imgUrl;
+            img.onload = function() {
+                document.getElementById("photo-box").innerHTML = `<img src="${imgUrl}" alt="Ultimo Ingresso">`;
+            };
+            img.onerror = function() {
+                document.getElementById("photo-box").innerHTML = `<span style="color: #64748b;">Nessuna foto presente</span>`;
+            };
         }
     </script>
 </body>

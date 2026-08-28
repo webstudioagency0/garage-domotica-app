@@ -1,0 +1,28 @@
+name: Gestore Eventi Garage
+
+on:
+  repository_dispatch:
+    types: [allarme_ingresso, comando_luce]
+
+jobs:
+  gestisci_evento:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il codice del repository
+        uses: actions/checkout@v3
+
+      - name: Registra evento di ingresso
+        if: github.event.action == 'allarme_ingresso'
+        run: |
+          echo "🚨 INGRESSO RILEVATO!"
+          echo "Ora: ${{ github.event.client_payload.ora }}"
+          echo "$(date +'%Y-%m-%d %H:%M:%S') - Ingresso rilevato: ${{ github.event.client_payload.messaggio }}" >> log_ingressi.txt
+
+      - name: Salva il file di log aggiornato
+        if: github.event.action == 'allarme_ingresso'
+        run: |
+          git config --global user.name "Garage Bot"
+          git config --global user.email "bot@garage.local"
+          git add log_ingressi.txt
+          git commit -m "Registro ingresso: ${{ github.event.client_payload.ora }}" || exit 0
+          git push

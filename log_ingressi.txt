@@ -1,1 +1,2 @@
 2026-08-28 20:49:30 - Ingresso rilevato: Test manuale da Mac
+[30/08/2026 19:40:47] - Movimento Rilevato (Test Mac)

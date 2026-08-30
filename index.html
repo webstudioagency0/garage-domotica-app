@@ -3,272 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garage C 🛠 - Cyber Security Hub</title>
+    <title>GARAGE C // Control Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-gold: #ffb700;
-            --bg-dark: #030712;
-            --card-bg: rgba(15, 23, 42, 0.85);
-            --border-color: rgba(0, 243, 255, 0.35);
+            --bg-base: #080b11;
+            --bg-surface: rgba(18, 24, 38, 0.7);
+            --bg-surface-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-emerald: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 10%, rgba(0, 243, 255, 0.15) 0%, transparent 60%),
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            color: #f8fafc;
-            margin: 0;
-            padding: 20px 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-main);
             min-height: 100vh;
-            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px 16px;
+            background-image: 
+                radial-gradient(circle at 50% -20%, rgba(0, 242, 254, 0.15), transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(79, 172, 254, 0.08), transparent 50%);
+            background-attachment: fixed;
             overflow-x: hidden;
         }
 
+        /* Intro Screen */
         #intro-overlay {
             position: fixed;
             inset: 0;
-            background: #020617;
-            z-index: 9999;
+            background: #05070c;
+            z-index: 99999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            transition: opacity 1s ease, transform 1s cubic-bezier(.77,0,.175,1);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         #intro-overlay.hide {
             opacity: 0;
-            transform: translateY(-100%);
+            transform: scale(1.05);
             pointer-events: none;
         }
 
-        .garage-door {
-            position: absolute;
-            top: 0; left: 0; right: 0;
+        .intro-logo {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #ffffff 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .intro-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .intro-loader {
+            width: 140px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .intro-loader-bar {
+            width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                #0b1329 0px,
-                #1e293b 12px,
-                #0f172a 24px,
-                #020617 25px
-            );
-            box-shadow: inset 0 -30px 60px rgba(0,0,0,0.95);
-            border-bottom: 6px solid #38bdf8;
-            z-index: 5;
-            animation: doorOpenRealistic 1.8s 0.6s cubic-bezier(.65,0,.07,1) forwards;
-        }
-        @keyframes doorOpenRealistic {
-            0% { transform: translateY(0%); }
-            20% { transform: translateY(-3%); }
-            100% { transform: translateY(-105%); }
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            animation: loadBar 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }
 
-        .hex-grid {
-            position: absolute;
-            top: -15%;
-            width: 130%;
-            height: 60%;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            transform: perspective(700px) rotateX(40deg);
-            opacity: 0.95;
-        }
-        .hex {
-            width: 65px; height: 75px;
-            background: #090d16;
-            clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-            border: 1px solid #1e293b;
-            transition: all 0.4s ease-out;
-            position: relative;
-        }
-        .hex.on {
-            background: #ffffff;
-            box-shadow: 0 0 20px #fff, 0 0 40px var(--neon-blue), inset 0 0 10px #fff;
-            border-color: var(--neon-blue);
+        @keyframes loadBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0); }
         }
 
-        .cars-container {
-            position: relative;
-            z-index: 2;
+        /* App Layout Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
             display: flex;
+            flex-direction: column;
             gap: 20px;
-            align-items: flex-end;
-            margin-top: 110px;
-            transform: perspective(600px) rotateX(12deg);
         }
-        .car {
-            width: 145px; height: 60px;
-            border-radius: 35px 35px 8px 8px;
-            position: relative;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.95), 0 0 30px rgba(0,243,255,0.3);
-            opacity: 0;
-            transform: translateY(100px) scale(0.9);
-            animation: carIn 0.9s cubic-bezier(.175,.885,.32,1.275) forwards;
-        }
-        .car::before, .car::after {
-            content: '';
-            position: absolute;
-            bottom: 12px;
-            width: 14px; height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 15px 5px var(--neon-blue);
-        }
-        .car::before { left: 10px; }
-        .car::after { right: 10px; }
 
-        .car:nth-child(1) { animation-delay: 1.2s; background: linear-gradient(to bottom, #dc2626 0%, #450a0a 85%); }
-        .car:nth-child(2) { width: 180px; height: 70px; animation-delay: 1.4s; background: linear-gradient(to bottom, #f8fafc 0%, #0f172a 85%); border: 1px solid var(--neon-blue); }
-        .car:nth-child(3) { animation-delay: 1.6s; background: linear-gradient(to bottom, #eab308 0%, #713f12 85%); }
-        @keyframes carIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+        /* Top Bar Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--bg-surface-border);
+            backdrop-filter: blur(16px);
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+        }
 
-        .garage-title {
-            position: relative; z-index: 3;
-            margin-top: 25px;
-            font-size: 38px; font-weight: 900; letter-spacing: 6px;
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(79, 172, 254, 0.1));
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 20px var(--neon-blue);
-            opacity: 0;
-            animation: titleIn 0.6s 2.2s forwards;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .garage-sub { color: #94a3b8; letter-spacing: 4px; font-size: 11px; margin-top: 6px; opacity: 0; animation: titleIn 0.6s 2.4s forwards; }
-        @keyframes titleIn { from { opacity:0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
-
-        .skip-btn {
-            position: absolute; bottom: 25px; right: 25px; z-index: 10;
-            background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); color: var(--neon-blue);
-            padding: 9px 18px; border-radius: 20px; font-size: 12px; cursor: pointer; backdrop-filter: blur(5px);
+            letter-spacing: 0.5px;
         }
 
-        .hud-header { text-align: center; margin-bottom: 25px; margin-top: 10px; }
-        .hud-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: #fff; text-shadow: 0 0 12px var(--neon-blue); }
-        .wrench-icon { display: inline-block; animation: spinWrench 8s linear infinite; filter: drop-shadow(0 0 8px var(--neon-blue)); }
-        @keyframes spinWrench { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 440px; margin-bottom: 20px; }
-        .metric-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px); }
-        .metric-info { display: flex; flex-direction: column; }
-        .metric-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .metric-value { font-size: 13px; font-weight: bold; color: var(--neon-blue); }
-
-        .card {
-            background: var(--card-bg); border-radius: 18px; padding: 22px; width: 100%; max-width: 440px;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); margin-bottom: 20px; box-sizing: border-box; backdrop-filter: blur(10px);
+        .brand-text span {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .card-title { font-size: 16px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px; }
 
-        .photo-box {
-            width: 100%; height: 240px; background-color: #020617; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed var(--border-color); position: relative;
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-emerald);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
-        .scanner-line {
-            position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--neon-blue);
-            box-shadow: 0 0 12px var(--neon-blue); animation: scanAnimation 2.8s ease-in-out infinite; z-index: 2;
-        }
-        @keyframes scanAnimation { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        #log-container {
-            font-family: "JetBrains Mono", monospace; background: #020617; padding: 14px; border-radius: 12px;
-            max-height: 180px; overflow-y: auto; white-space: pre-wrap; font-size: 12px; color: var(--neon-blue); border: 1px solid rgba(0, 243, 255, 0.2);
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--accent-emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-emerald);
+            animation: pulse 2s infinite;
         }
-        .pulse-dot { width: 8px; height: 8px; background-color: var(--neon-blue); border-radius: 50%; box-shadow: 0 0 10px var(--neon-blue); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* Quick Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--bg-surface-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        /* Control Action Buttons */
+        .controls-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--bg-surface-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: var(--text-sub);
+        }
+
+        .action-btn.active {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(79, 172, 254, 0.08));
+            border-color: rgba(0, 242, 254, 0.4);
+            color: var(--accent-cyan);
+            box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+        }
+
+        .action-btn span {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .action-icon {
+            font-size: 20px;
+        }
+
+        /* Camera Feed Card */
+        .camera-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--bg-surface-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .camera-frame {
+            width: 100%;
+            height: 230px;
+            background-color: #030509;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(0, 242, 254, 0.08) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .scan-line {
+            position: absolute;
+            left: 0; right: 0; height: 2px;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan);
+            animation: scan 3s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .camera-meta {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .cam-tag {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Logs Section */
+        .logs-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--bg-surface-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .log-box {
+            background: #030509;
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #38bdf8;
+            max-height: 180px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.6;
+        }
+
+        .log-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        /* Footer */
+        .app-footer {
+            text-align: center;
+            padding: 10px 0;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Intro Animation Screen -->
     <div id="intro-overlay">
-        <div class="garage-door"></div>
-        <div class="hex-grid" id="hex-grid"></div>
-        <div class="cars-container">
-            <div class="car"></div>
-            <div class="car"></div>
-            <div class="car"></div>
+        <div class="intro-logo">Garage C</div>
+        <div class="intro-sub">Mechatronics & Control System</div>
+        <div class="intro-loader">
+            <div class="intro-loader-bar"></div>
         </div>
-        <div class="garage-title"><span class="wrench-icon">🛠</span> GARAGE <span>C</span></div>
-        <div class="garage-sub">LUXURY MECHATRONICS // AUTOMATION HUB</div>
-        <button class="skip-btn" onclick="chiudiIntro()">Salta Intro ✕</button>
     </div>
 
-    <div class="hud-header">
-        <div class="hud-title"><span class="wrench-icon">🛠</span> GARAGE C</div>
-        <div style="color: #94a3b8; font-size: 11px; letter-spacing: 3px;">CYBERNETIC MONITORING SYSTEM</div>
-    </div>
+    <!-- Main Dashboard Container -->
+    <div class="app-container">
+        
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-icon">🏎</div>
+                <div class="brand-text">
+                    <h1>Garage C</h1>
+                    <span>Smart Hub v2.5</span>
+                </div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>ONLINE</span>
+            </div>
+        </header>
 
-    <div class="metrics-grid">
-        <div class="metric-card">
-            <span style="font-size:22px;">🏎</span>
-            <div class="metric-info">
-                <span class="metric-label">Stato Box</span>
-                <span class="metric-value">ATTIVO</span>
+        <!-- Quick Telemetry Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🌡</div>
+                <div class="stat-content">
+                    <span class="stat-label">Temperatura</span>
+                    <span class="stat-value">19.5 °C</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+                <div class="stat-content">
+                    <span class="stat-label">Umidità</span>
+                    <span class="stat-value">48 %</span>
+                </div>
             </div>
         </div>
-        <div class="metric-card">
-            <span style="font-size:22px;">📡</span>
-            <div class="metric-info">
-                <span class="metric-label">Sensori</span>
-                <span class="metric-value">ONLINE</span>
+
+        <!-- Interactive Quick Controls -->
+        <div class="controls-card">
+            <div class="card-header">
+                <div class="card-title">⚡ Controlli Rapidi</div>
+            </div>
+            <div class="quick-actions">
+                <button class="action-btn active" id="btn-gate" onclick="toggleAction('btn-gate', 'Portone')">
+                    <span class="action-icon">🚪</span>
+                    <span>Basculante</span>
+                </button>
+                <button class="action-btn active" id="btn-light" onclick="toggleAction('btn-light', 'Luci')">
+                    <span class="action-icon">💡</span>
+                    <span>Illuminazione</span>
+                </button>
+                <button class="action-btn active" id="btn-sec" onclick="toggleAction('btn-sec', 'Allarme')">
+                    <span class="action-icon">🛡</span>
+                    <span>Sicurezza</span>
+                </button>
             </div>
         </div>
-    </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">📷 Scansione Ottica</h3>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--neon-blue);">
-                <span class="pulse-dot"></span> LIVE
+        <!-- Optical Scan / Live Camera -->
+        <div class="camera-card">
+            <div class="card-header">
+                <div class="card-title">📷 Scansione Ottica</div>
+                <span class="cam-tag">LIVE FEED</span>
+            </div>
+            <div class="camera-frame" id="camera-frame">
+                <div class="scan-overlay"></div>
+                <div class="scan-line"></div>
+                <div class="camera-meta">
+                    <span class="cam-tag">CAM_01 // GARAGE_C</span>
+                </div>
+                <span style="color: var(--text-muted); font-size: 12px; font-weight: 500;">Ricerca segnale video...</span>
             </div>
         </div>
-        <div class="photo-box" id="photo-box">
-            <div class="scanner-line"></div>
-            <span style="color: #64748b; font-size: 13px;">Nessuno scatto rilevato</span>
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">📋 Registro Telemetrico</h3>
-            <span style="font-size: 11px; color: #64748b;">AUTO-SYNC</span>
+        <!-- Live Telemetry Logs -->
+        <div class="logs-card">
+            <div class="card-header">
+                <div class="card-title">📋 Registro Eventi</div>
+                <span style="font-size: 10px; color: var(--text-muted); font-weight: 600; font-family: var(--font-mono);">SYNC 5S</span>
+            </div>
+            <div class="log-box" id="log-container">Inizializzazione sistema di tracciamento...</div>
         </div>
-        <div id="log-container">Inizializzazione feed...</div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            Garage Domotica &copy; 2026 // Secure Control Environment
+        </footer>
+
     </div>
 
     <script>
-        const grid = document.getElementById('hex-grid');
-        for(let i=0; i<32; i++){
-            const h = document.createElement('div');
-            h.className = 'hex';
-            grid.appendChild(h);
-        }
-        const hexs = document.querySelectorAll('.hex');
-        hexs.forEach((hex, i) => {
-            setTimeout(() => hex.classList.add('on'), 500 + i * 55);
-        });
-        setTimeout(chiudiIntro, 4800);
+        // Dismiss Intro Screen
+        setTimeout(() => {
+            const overlay = document.getElementById('intro-overlay');
+            if (overlay) overlay.classList.add('hide');
+        }, 1500);
 
-        function chiudiIntro(){
-            const intro = document.getElementById('intro-overlay');
-            if(intro && !intro.classList.contains('hide')){
-                intro.classList.add('hide');
-            }
+        // Interactive Toggle Controls
+        function toggleAction(id, name) {
+            const btn = document.getElementById(id);
+            btn.classList.toggle('active');
         }
 
+        // Live Data & Image Fetching
         function caricaDati() {
             const cacheBuster = new Date().getTime();
+            
+            // Load text log
             fetch(`./log_ingressi.txt?t=${cacheBuster}`)
                 .then(res => {
                     if(!res.ok) throw new Error();
@@ -278,18 +542,33 @@
                     document.getElementById("log-container").innerText = text;
                 })
                 .catch(() => {
-                    document.getElementById("log-container").innerText = ">> Nessun evento registrato.";
+                    document.getElementById("log-container").innerText = ">> Nessun nuovo evento registrato.";
                 });
 
-            const photoBox = document.getElementById("photo-box");
+            // Load latest camera snapshot
+            const camFrame = document.getElementById("camera-frame");
             const imgPath = `./ultima_foto.jpg?t=${cacheBuster}`;
             const img = new Image();
             img.src = imgPath;
             img.onload = function() {
-                photoBox.innerHTML = `<div class="scanner-line"></div><img src="${imgPath}" alt="Ultimo Ingresso">`;
+                camFrame.innerHTML = `
+                    <div class="scan-overlay"></div>
+                    <div class="scan-line"></div>
+                    <div class="camera-meta">
+                        <span class="cam-tag">CAM_01 // GARAGE_C</span>
+                    </div>
+                    <img src="${imgPath}" alt="Ultima Scansione">
+                `;
             };
             img.onerror = function() {
-                photoBox.innerHTML = `<div class="scanner-line"></div><span style="color: #64748b; font-size: 13px;">Nessuna foto presente</span>`;
+                camFrame.innerHTML = `
+                    <div class="scan-overlay"></div>
+                    <div class="scan-line"></div>
+                    <div class="camera-meta">
+                        <span class="cam-tag">CAM_01 // GARAGE_C</span>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 500;">Nessuno scatto presente</span>
+                `;
             };
         }
 

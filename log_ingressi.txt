@@ -2,3 +2,4 @@
 [30/08/2026 19:40:47] - Movimento Rilevato (Test Mac)
 [30/08/2026 19:53:01] - Movimento Rilevato (Test Mac)
 [30/08/2026 19:54:21] - Movimento Rilevato (Test Mac)
+[30/08/2026 19:55:28] - Movimento Rilevato (Test Mac)
